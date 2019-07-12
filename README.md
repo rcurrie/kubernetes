@@ -1,2 +1,3 @@
-# kubenetes
-Various snippets and tooling to use a kubernetes cluster
+# Kubernetes
+
+Basic examples of directly using Kubernetes to spin up a server with secrets as well as run a job

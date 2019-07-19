@@ -4,6 +4,13 @@ build:
 	# Build customer docker image
 	docker build -f Dockerfile -t $(USER)-ubuntu .
 
+debug:
+	docker run -it --rm \
+		-v `pwd`:/app \
+		--user=`id -u`:`id -g` \
+		--entrypoint /bin/bash \
+		$(USER)-ubuntu
+
 push:
 	# Push our containers to dockerhub for running in k8s
 	docker tag $(USER)-ubuntu $(DOCKERHUB_ACCOUNT)/ubuntu
@@ -13,6 +20,12 @@ update-secrets:
 	# Update secrets from our AWS file so we can access S3 in k8s
 	kubectl delete secrets/$(USER)-aws-credentials
 	kubectl create secret generic $(USER)-aws-credentials --from-file=../.aws/credentials
+
+run-job:
+	kubectl create -f job.yml
+
+delete-job:
+	kubectl delete job/magic-job
 
 create-pod:
 	# Create a pod 

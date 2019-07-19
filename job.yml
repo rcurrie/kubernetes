@@ -1,41 +1,24 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: job
+  name: magic-job
 spec:
-  # Don't restart if error
   backoffLimit: 0
   template:
     spec:
-      # Delete the job after a certain number of seconds
-      ttlSecondsAfterFinished: 60
       containers:
-      - name: run-notebook
+      - name: magic
         image: robcurrie/ubuntu
         imagePullPolicy: Always
-        command: ["sleep"]
-        args: ["infinity"]
-        env:
-          - name: AWS_PROFILE
-            value: "prp"
-          - name: AWS_S3_ENDPOINT
-            value: "https://s3.nautilus.optiputer.net"
-        volumeMounts:
-          - mountPath: /root/.aws
-            name: credentials
         resources:
           requests:
             cpu: "1"
             memory: "1Gi"
-            nvidia.com/gpu: 0
           limits:
             cpu: "2"
             memory: "2Gi"
-            nvidia.com/gpu: 0
+        # command: ["python3", "run.py"]
+        # args: ["foobar"]
         command: ["/bin/bash", "-c"]
-        args: [ ]
+        args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
       restartPolicy: Never
-      volumes:
-      - name: credentials
-        secret:
-          secretName: s3-credentials

@@ -1,3 +1,4 @@
+import time
 import argparse
 
 if __name__ == '__main__':
@@ -7,4 +8,6 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", required=False,
                         help="Verbose output")
     args = parser.parse_args()
-    print("Performing magic on", args.fastq)
+    for i in range(100):
+        print("Performing magic on {} block {}".format(args.fastq, i))
+        time.sleep(1)

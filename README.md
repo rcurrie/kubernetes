@@ -1,3 +1,3 @@
 # Kubernetes
 
-Basic examples of directly using Kubernetes to spin up a server with secrets as well as run a job
+Simple example to build a custom container, debug it, and then run it in a Kubernetes job.

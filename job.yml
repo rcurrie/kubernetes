@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: magic-job
+  name: $USER-$TS
 spec:
   backoffLimit: 0
   template:
@@ -17,8 +17,8 @@ spec:
           limits:
             cpu: "2"
             memory: "2Gi"
-        # command: ["python3", "run.py"]
-        # args: ["foobar"]
-        command: ["/bin/bash", "-c"]
-        args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
+        command: ["python3", "run.py"]
+        args: ["foobar"]
+        # command: ["/bin/bash", "-c"]
+        # args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
       restartPolicy: Never

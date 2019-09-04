@@ -4,34 +4,20 @@ metadata:
   name: $USER-$TS
 spec:
   backoffLimit: 0
+  ttlSecondsAfterFinished: 30
   template:
     spec:
       containers:
       - name: magic
         image: robcurrie/ubuntu
         imagePullPolicy: Always
-        volumeMounts:
-        - mountPath: /scratch
-          name: scratch-volume
-        - mountPath: /root/.aws
-          name: s3-credentials
         resources:
           requests:
-            cpu: "1"
-            memory: "1Gi"
-            ephemeral-storage: "2Mi"
+            cpu: "30"
+            memory: "30G"
           limits:
-            cpu: "2"
-            memory: "2Gi"
-            ephemeral-storage: "4Mi"
-        command: ["python3", "run.py"]
-        args: ["-c", "1000", "$USER-$TS"]
-        # command: ["/bin/bash", "-c"]
-        # args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
+            cpu: "31"
+            memory: "40G"
+        command: ["/bin/bash", "-c"]
+        args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
       restartPolicy: Never
-      volumes:
-      - name: scratch-volume
-        emptyDir: {}
-      - name: s3-credentials
-        secret:
-          secretName: prp-s3-credentials

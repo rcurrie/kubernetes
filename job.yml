@@ -13,11 +13,13 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            cpu: "30"
-            memory: "30G"
+            cpu: "1"
+            memory: "1G"
           limits:
-            cpu: "31"
-            memory: "40G"
-        command: ["/bin/bash", "-c"]
-        args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
+            cpu: "2"
+            memory: "2G"
+        # command: ["/bin/bash", "-c"]
+        # args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
+        command: ["python3", "run.py"]
+        args: ["-c", "100", "foobar"]
       restartPolicy: Never

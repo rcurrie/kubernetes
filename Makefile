@@ -1,5 +1,3 @@
-DOCKERHUB_ACCOUNT ?= "robcurrie"
-
 build:
 	# Build custom docker image
 	docker build -f Dockerfile -t $(USER)-ubuntu .
@@ -23,7 +21,7 @@ push:
 	docker push $(DOCKERHUB_ACCOUNT)/ubuntu
 
 run-job:
-	# Run a kubernetes job with our container
+	# Run a kubernetes job with our container, prefix with USERNAME and timestamp
 	TS=`date +"%Y%m%d-%H%M%S"` envsubst < job.yml | kubectl create -f -
 
 delete-my-jobs:

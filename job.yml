@@ -1,25 +1,41 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+  # Prefix name of job with user and timestamp
   name: $USER-$TS
 spec:
   backoffLimit: 0
-  ttlSecondsAfterFinished: 30
+  # Delete the log after a minute
+  ttlSecondsAfterFinished: 60
   template:
     spec:
       containers:
       - name: magic
-        image: robcurrie/ubuntu
+        image: $DOCKERHUB_ACCOUNT/ubuntu
         imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /scratch
+          name: scratch-volume
+        # - mountPath: /root/.aws
+        #   name: s3-credentials
         resources:
           requests:
             cpu: "1"
             memory: "1G"
+            ephemeral-storage: "2M"
           limits:
             cpu: "2"
             memory: "2G"
+            ephemeral-storage: "4M"
         # command: ["/bin/bash", "-c"]
         # args: ['for i in {1..100}; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
         command: ["python3", "run.py"]
-        args: ["-c", "100", "foobar"]
+        args: ["-c", "1000", "foobar"]
       restartPolicy: Never
+      volumes:
+      - name: scratch-volume
+        emptyDir: {}
+      # - name: s3-credentials
+      #   secret:
+      #     secretName: prp-s3-credentials
+

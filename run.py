@@ -9,5 +9,5 @@ if __name__ == '__main__':
                         help="Count")
     args = parser.parse_args()
     for i in range(int(args.count)):
-        print("Calculating magic on block {} from {}".format(i, args.file), flush=True)
+        print("Calculating magic on block {} from file {}".format(i, args.file), flush=True)
         time.sleep(1)

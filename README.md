@@ -42,7 +42,7 @@ latest: digest: sha256:d72d572b9f3b7683a1e07a80ac04fdb6076870087ac789d1079d54873
 ```
 Run the custom container in a job:
 ```
-$ make run-job
+$ DOCKERHUB_ACCOUNT=robcurrie make run-job
 # Run a kubernetes job with our container
 TS=`date +"%Y%m%d-%H%M%S"` envsubst < job.yml | kubectl create -f -
 job.batch/rcurrie-20190904-171803 created
@@ -103,6 +103,23 @@ Run the container locally before pushing:
 make run
 ```
 
+Build, push and launch a job
+```
+$ DOCKERHUB_ACCOUNT=<your dockerhub account> make build push run-job
+# Build custom docker image
+docker build -f Dockerfile -t rcurrie-ubuntu .
+Sending build context to Docker daemon  136.2kB
+Step 1/8 : FROM ubuntu:18.04
+...
+docker push robcurrie/ubuntu
+The push refers to repository [docker.io/robcurrie/ubuntu]
+c59a876203dd: Layer already exists
+...
+# Run a kubernetes job with our container, prefix with USERNAME and timestamp
+TS=`date +"%Y%m%d-%H%M%S"` envsubst < job.yml | kubectl create -f -
+job.batch/rcurrie-20190905-062754 created
+```
+
 ## Bash Completion
 Add:
 ```
@@ -115,7 +132,7 @@ Set the [KUBECONFIG environment variable](https://kubernetes.io/docs/concepts/co
 ```
 kubectl config use-context <context name>
 ```
-To automatically reference all config files with the suffice .config add the following to your ~/.bash_profile:
+To automatically reference all config files with the suffix .config add the following to your ~/.bash_profile:
 ```
 export KUBECONFIG=`find $HOME/.kube/ -name "*.config" -printf "%p:"`
 ```

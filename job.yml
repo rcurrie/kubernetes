@@ -18,6 +18,7 @@ spec:
           name: scratch-volume
         - mountPath: /root/.aws
           name: s3-credentials
+          readOnly: true
         resources:
           requests:
             cpu: "1"
@@ -38,4 +39,3 @@ spec:
       - name: s3-credentials
         secret:
           secretName: shared-s3-credentials
-

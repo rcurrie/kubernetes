@@ -80,6 +80,13 @@ make delete-my-jobs
 ```
 NOTE: This will stop and delete any running jobs as well as the logs from previous jobs
 
+## Secrets
+The job.yml specifies a share secret that has been configured in the namespace already. The aws cli is installed in the image and as a result you can use aws cli and/or boto3 when shelled into the container or in run.py:
+```
+root@rcurrie-20190909-173419-kvwft:/app# aws s3 ls s3://vg-k8s
+2019-09-10 00:26:50          7 hello.txt
+```
+
 ## Development
 Run the container on your local machine with the local run.py mapped and shell into it:
 ```
@@ -103,7 +110,7 @@ Run the container locally before pushing:
 make run
 ```
 
-Build, push and launch a job
+Build, push and launch a job all at once:
 ```
 $ DOCKERHUB_ACCOUNT=<your dockerhub account> make build push run-job
 # Build custom docker image

@@ -143,3 +143,4 @@ To automatically reference all config files with the suffix .config add the foll
 ```
 export KUBECONFIG=`find $HOME/.kube/ -name "*.config" -printf "%p:"`
 ```
+You can create your own set of cluster and namespaces which will be integrated automatically by kubectl letting you switch and set both at once. See [configuring access to multiple clusters](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/) for more details.

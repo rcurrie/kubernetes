@@ -16,8 +16,8 @@ spec:
         volumeMounts:
         - mountPath: /scratch
           name: scratch-volume
-        # - mountPath: /root/.aws
-        #   name: s3-credentials
+        - mountPath: /root/.aws
+          name: s3-credentials
         resources:
           requests:
             cpu: "1"
@@ -35,7 +35,7 @@ spec:
       volumes:
       - name: scratch-volume
         emptyDir: {}
-      # - name: s3-credentials
-      #   secret:
-      #     secretName: prp-s3-credentials
+      - name: s3-credentials
+        secret:
+          secretName: shared-s3-credentials
 

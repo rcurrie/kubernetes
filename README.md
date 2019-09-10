@@ -3,7 +3,7 @@ Simple example to build a custom container, debug it, and then run it in a Kuber
 
 ## Requirements
 make
-docker
+[docker](https://docs.docker.com/install/)
 A [docker hub](https://hub.docker.com) account
 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 Kubernetes configuration file for your cluster (in ~/.kube/config)

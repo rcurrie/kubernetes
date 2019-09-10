@@ -28,3 +28,8 @@ delete-my-jobs:
 	# Delete jobs prefixed with USERNAME
 	kubectl get jobs -o custom-columns=:.metadata.name \
 		| grep '^$(USER)*' | xargs kubectl delete jobs
+
+update-secrets:
+	# Update secrets from our AWS file so we can access S3 in k8s
+	kubectl delete secrets/shared-s3-credentials
+	kubectl create secret generic shared-s3-credentials --from-file=credentials=../cgl-shared-s3-credentials

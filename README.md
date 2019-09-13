@@ -1,20 +1,20 @@
 # Kubernetes
-Simple example to build a custom container, debug it, and then run it in a Kubernetes job.
+Simple example to build a custom docker image, debug it, and then run it in a [kubernetes](https://kubernetes.io/docs/tutorials/kubernetes-basics/) [job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
 
 ## Requirements
 make
 [docker](https://docs.docker.com/install/)
 A [docker hub](https://hub.docker.com) account
 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-Kubernetes configuration file for your cluster (in ~/.kube/config)
+A kubernetes configuration file for your cluster (in ~/.kube/config)
 
 ## Quick Start
-Clone this repo and switch into it:
+Clone this repo and change into its directory:
 ```
 git clone https://github.com/rcurrie/kubernetes.git
 cd kubernetes
 ```
-Build a custom container with run.py in it:
+Build a custom image with run.py in it:
 ```
 $ make build
 # Build custom docker image
@@ -29,10 +29,20 @@ Step 8/8 : ENTRYPOINT ["python3", "run.py"]
 Successfully built 3bec533b42cb
 Successfully tagged rcurrie-ubuntu:latest
 ```
-Push your container to docker hub so it is accessible to the cluster:
+Run the image in a container locally:
+```
+$ make run
+# Run the image in a container locally
+docker run -it --rm \
+        rcurrie-ubuntu -c 3 foobar
+Calculating magic on block 0 from file foobar
+Calculating magic on block 1 from file foobar
+Calculating magic on block 2 from file foobar
+```
+Push your image to docker hub so it is accessible to the cluster:
 ```
 $ DOCKERHUB_ACCOUNT=<your docker hub account> make push
-# Push our container to dockerhub for running in k8s
+# Push our image to dockerhub for running in k8s
 docker tag rcurrie-ubuntu robcurrie/ubuntu
 docker push robcurrie/ubuntu
 The push refers to repository [docker.io/robcurrie/ubuntu]
@@ -40,10 +50,10 @@ The push refers to repository [docker.io/robcurrie/ubuntu]
 ...
 latest: digest: sha256:d72d572b9f3b7683a1e07a80ac04fdb6076870087ac789d1079d548731a385da size: 2405
 ```
-Run the custom container in a job:
+Run the image in a container in a kubernetes job:
 ```
 $ DOCKERHUB_ACCOUNT=robcurrie make run-job
-# Run a kubernetes job with our container
+# Run a kubernetes job with our image, prefix with USERNAME and timestamp
 TS=`date +"%Y%m%d-%H%M%S"` envsubst < job.yml | kubectl create -f -
 job.batch/rcurrie-20190904-171803 created
 ```
@@ -62,7 +72,46 @@ Performing magic block 1 from foobar
 ```
 NOTE: You can view the logs of completed jobs as well as running jobs
 
-## Running
+## Development
+Run the image in a docker container on your local machine with the local run.py mapped and shell into it:
+```
+$ make debug
+# Run our image with the local version of the app and shell into it
+docker run -it --rm \
+        -v `pwd`:/app \
+        --user=`id -u`:`id -g` \
+        --entrypoint /bin/bash \
+        rcurrie-ubuntu
+groups: cannot find name for group ID 2000
+I have no name!@afa68a3595b2:/app$ python3 run.py foobar
+Calculating magic on block 0 from foobar
+Calculating magic on block 1 from foobar
+...
+```
+REMINDER: Changing run.py will show up in the container as its mapped which is handy for editing externally and running in the container locally. The benefit of this pattern is all your dependencies are in the container isolated from the host operating system and codified in the image so if it works locally it will likely work somewhere else. Before running in a cluster remember to build and push the container so that the edited run.py is updated. For more dynamic configuration you can customize the command and args in job.yml or have the job itself pull code or configuration from somewhere else. For example [this script](https://github.com/rcurrie/jupyter/blob/master/job.py) pulls a jupyter notebook specified in args into a job from s3, runs it, and pushes it back to s3.
+
+Run the image in a container locally before pushing:
+```
+make run
+```
+
+Build, push and launch the image in a job all at once:
+```
+$ DOCKERHUB_ACCOUNT=<your dockerhub account> make build push run-job
+# Build custom docker image
+docker build -f Dockerfile -t rcurrie-ubuntu .
+Sending build context to Docker daemon  136.2kB
+Step 1/8 : FROM ubuntu:18.04
+...
+docker push robcurrie/ubuntu
+The push refers to repository [docker.io/robcurrie/ubuntu]
+c59a876203dd: Layer already exists
+...
+# Run a kubernetes job with our container, prefix with USERNAME and timestamp
+TS=`date +"%Y%m%d-%H%M%S"` envsubst < job.yml | kubectl create -f -
+job.batch/rcurrie-20190905-062754 created
+```
+
 Shell into a job running in the cluster:
 ```
 $ kubectl exec -it rcurrie-20190904-172125-2cm78 /bin/bash
@@ -80,53 +129,6 @@ make delete-my-jobs
 ```
 NOTE: This will stop and delete any running jobs as well as the logs from previous jobs
 
-## Secrets
-The job.yml specifies a share secret that has been configured in the namespace already. The aws cli is installed in the image and as a result you can use aws cli and/or boto3 when shelled into the container or in run.py:
-```
-root@rcurrie-20190909-173419-kvwft:/app# aws s3 ls s3://vg-k8s
-2019-09-10 00:26:50          7 hello.txt
-```
-
-## Development
-Run the container on your local machine with the local run.py mapped and shell into it:
-```
-$ make debug
-# Run our image with the local version of the app and shell into it
-docker run -it --rm \
-        -v `pwd`:/app \
-        --user=`id -u`:`id -g` \
-        --entrypoint /bin/bash \
-        rcurrie-ubuntu
-groups: cannot find name for group ID 2000
-I have no name!@afa68a3595b2:/app$ python3 run.py foobar
-Calculating magic on block 0 from foobar
-Calculating magic on block 1 from foobar
-...
-```
-REMINDER: Changing run.py will show up in the container as its mapped which is handy for editing externally and running in the container locally. Before running in a cluster you need to build and push the container so that the edited run.py is updated.
-
-Run the container locally before pushing:
-```
-make run
-```
-
-Build, push and launch a job all at once:
-```
-$ DOCKERHUB_ACCOUNT=<your dockerhub account> make build push run-job
-# Build custom docker image
-docker build -f Dockerfile -t rcurrie-ubuntu .
-Sending build context to Docker daemon  136.2kB
-Step 1/8 : FROM ubuntu:18.04
-...
-docker push robcurrie/ubuntu
-The push refers to repository [docker.io/robcurrie/ubuntu]
-c59a876203dd: Layer already exists
-...
-# Run a kubernetes job with our container, prefix with USERNAME and timestamp
-TS=`date +"%Y%m%d-%H%M%S"` envsubst < job.yml | kubectl create -f -
-job.batch/rcurrie-20190905-062754 created
-```
-
 ## Bash Completion
 Add:
 ```
@@ -134,7 +136,17 @@ source <(kubectl completion bash)
 ```
 to your ~/.bash_profile for tab completion of job names
 
-## Multiple Clusters
+## Secrets
+The job.yml specifies a shared secret that has been configured in the namespace already. The aws cli is installed in the image and as a result you can use aws cli and/or boto3 when shelled into the container or in run.py:
+```
+root@rcurrie-20190909-173419-kvwft:/app# aws s3 ls s3://vg-k8s
+2019-09-10 00:26:50          7 hello.txt
+```
+
+## Job Patterns and Frameworks
+This repo demonstrates core close to the metal kubernetes and jobs. There are many other [job patterns](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#job-patterns) as well as a plethora of higher level frameworks that support kubernetes such as [snakemake](https://snakemake.readthedocs.io/en/stable/), [nextflow](https://www.nextflow.io), [kubeflow](https://www.kubeflow.org), [pachyderm](https://www.pachyderm.io) and [polyaxon](https://polyaxon.com).
+
+## Using Multiple Clusters
 Set the [KUBECONFIG environment variable](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#supporting-multiple-clusters-users-and-authentication-mechanisms) to a colon separated list of all your config files. You can then switch clusters in a stateful way via 
 ```
 kubectl config use-context <context name>

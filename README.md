@@ -1,11 +1,15 @@
 # Kubernetes
-Simple example to build a custom docker image, debug it, and then run it in a [kubernetes](https://kubernetes.io/docs/tutorials/kubernetes-basics/) [job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
+Simple example to build a custom docker image, debug it, and run it in a [kubernetes](https://kubernetes.io/docs/tutorials/kubernetes-basics/) [job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/).
 
 ## Requirements
 make
+
 [docker](https://docs.docker.com/install/)
+
 A [docker hub](https://hub.docker.com) account
+
 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+
 A kubernetes configuration file for your cluster (in ~/.kube/config)
 
 ## Quick Start
@@ -88,12 +92,9 @@ Calculating magic on block 0 from foobar
 Calculating magic on block 1 from foobar
 ...
 ```
-REMINDER: Changing run.py will show up in the container as its mapped which is handy for editing externally and running in the container locally. The benefit of this pattern is all your dependencies are in the container isolated from the host operating system and codified in the image so if it works locally it will likely work somewhere else. Before running in a cluster remember to build and push the container so that the edited run.py is updated. For more dynamic configuration you can customize the command and args in job.yml or have the job itself pull code or configuration from somewhere else. For example [this script](https://github.com/rcurrie/jupyter/blob/master/job.py) pulls a jupyter notebook specified in args into a job from s3, runs it, and pushes it back to s3.
+Changing run.py will show up in the container immediately as its a mapped file which is handy for editing externally and running in the container locally by exec'ing /bin/bash. The benefit of this pattern is all your dependencies are in the container isolated from the host operating system and codified in the image - if it works locally it will likely work somewhere else. 
 
-Run the image in a container locally before pushing:
-```
-make run
-```
+REMINDER: Before running in a cluster remember to build and push the container so that the edited run.py is updated. For more dynamic configuration you can customize the command and args in job.yml or have the job itself pull code or configuration from somewhere else. For example [this script](https://github.com/rcurrie/jupyter/blob/master/job.py) pulls a jupyter notebook specified in args into a job from s3, runs it, and pushes it back to s3.
 
 Build, push and launch the image in a job all at once:
 ```
